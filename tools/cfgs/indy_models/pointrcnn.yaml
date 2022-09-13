@@ -9,8 +9,8 @@ DATA_CONFIG:
 
         -   NAME: sample_points
             NUM_POINTS: {
-                'train': 1000,
-                'test': 1000
+                'train': 16384,
+                'test': 16384
             }
 
         -   NAME: shuffle_points
