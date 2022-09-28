@@ -148,10 +148,12 @@ class DataProcessor(object):
             return partial(self.sample_points, config=config)
 
         num_points = config.NUM_POINTS[self.mode]
+        #print("nums_points: ", num_points)
         if num_points == -1:
             return data_dict
 
         points = data_dict['points']
+        #print("points: ", len(points))
         if num_points < len(points):
             pts_depth = np.linalg.norm(points[:, 0:3], axis=1)
             pts_near_flag = pts_depth < 40.0
@@ -169,7 +171,7 @@ class DataProcessor(object):
         else:
             choice = np.arange(0, len(points), dtype=np.int32)
             if num_points > len(points):
-                extra_choice = np.random.choice(choice, num_points - len(points), replace=False)
+                extra_choice = np.random.choice(choice, num_points - len(points), replace=True)
                 choice = np.concatenate((choice, extra_choice), axis=0)
             np.random.shuffle(choice)
         data_dict['points'] = points[choice]
