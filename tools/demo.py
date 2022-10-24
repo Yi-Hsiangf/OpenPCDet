@@ -48,6 +48,8 @@ class DemoDataset(DatasetTemplate):
             points = np.fromfile(self.sample_file_list[index], dtype=np.float32).reshape(-1, 4)
         elif self.ext == '.npy':
             points = np.load(self.sample_file_list[index])
+        elif self.ext == '.pcd':
+            points = np.asarray(open3d.io.read_point_cloud(str(self.sample_file_list[index]), format="pcd").points)[:, :3]
         else:
             raise NotImplementedError
 
@@ -67,7 +69,7 @@ def parse_config():
     parser.add_argument('--data_path', type=str, default='demo_data',
                         help='specify the point cloud data file or directory')
     parser.add_argument('--ckpt', type=str, default=None, help='specify the pretrained model')
-    parser.add_argument('--ext', type=str, default='.bin', help='specify the extension of your point cloud data file')
+    parser.add_argument('--ext', type=str, default='.pcd', help='specify the extension of your point cloud data file')
 
     args = parser.parse_args()
 
