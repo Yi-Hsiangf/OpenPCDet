@@ -1,7 +1,7 @@
 DATASET: 'IndyDataset'
 DATA_PATH: '../data/indy'
 
-POINT_CLOUD_RANGE: [-100, -100, -0.5, 100, 100, 9.5]
+POINT_CLOUD_RANGE: [-100, -20, -0.5, 20, 100, 4.5]
 
 
 DATA_SPLIT: {
