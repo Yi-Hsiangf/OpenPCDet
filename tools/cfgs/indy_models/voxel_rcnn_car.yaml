@@ -11,10 +11,9 @@ DATA_CONFIG:
                   - kitti_dbinfos_train.pkl
               PREPARE: {
                  filter_by_min_points: ['Car:5'],
-                 #filter_by_difficulty: [-1],
               }
 
-              SAMPLE_GROUPS: ['Car:10']
+              SAMPLE_GROUPS: ['Car:20']
               NUM_POINT_FEATURES: 3
               DATABASE_WITH_FAKELIDAR: False
               REMOVE_EXTRA_WIDTH: [0.0, 0.0, 0.0]
@@ -27,7 +26,8 @@ DATA_CONFIG:
               WORLD_ROT_ANGLE: [-0.78539816, 0.78539816]
 
             - NAME: random_world_scaling
-              WORLD_SCALE_RANGE: [0.95, 1.05]     
+              WORLD_SCALE_RANGE: [0.95, 1.05]
+     
 MODEL:
     NAME: VoxelRCNN
 
@@ -62,7 +62,7 @@ MODEL:
         ANCHOR_GENERATOR_CONFIG: [
             {
                 'class_name': 'Car',
-                'anchor_sizes': [[3.9, 1.6, 1.56]],
+                'anchor_sizes': [[4.88, 1.9, 1.18]],
                 'anchor_rotations': [0, 1.57],
                 'anchor_bottom_heights': [-1.78],
                 'align_center': False,
