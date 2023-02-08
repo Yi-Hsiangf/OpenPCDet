@@ -26,8 +26,9 @@ class IndyDataset(DatasetTemplate):
             dataset_cfg=dataset_cfg, class_names=class_names, training=training, root_path=root_path, logger=logger
         )
         self.split = self.dataset_cfg.DATA_SPLIT[self.mode]
+        print("self.split: ", self.split)
         self.root_split_path = self.root_path / ('training' if self.split != 'test' else 'testing')
-
+        print("self.root_split_path: ", self.root_split_path)
         split_dir = self.root_path / 'ImageSets' / (self.split + '.txt')
         self.sample_id_list = [x.strip() for x in open(split_dir).readlines()] if split_dir.exists() else None
 
@@ -89,7 +90,7 @@ class IndyDataset(DatasetTemplate):
 
     def get_label(self, idx):
         label_file = self.root_split_path / 'label_2' / ('%s.txt' % idx)
-        assert label_file.exists()
+        assert label_file.exists(), label_file
         return object3d_kitti.get_objects_from_label(label_file)
 
     def get_depth_map(self, idx):

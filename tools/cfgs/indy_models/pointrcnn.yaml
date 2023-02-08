@@ -9,8 +9,8 @@ DATA_CONFIG:
 
         -   NAME: sample_points
             NUM_POINTS: {
-                'train': 5500,
-                'test': 5500
+                'train': 25000,
+                'test': 25000
             }
 
         -   NAME: shuffle_points
@@ -46,7 +46,7 @@ MODEL:
             BOX_CODER_CONFIG: {
                 'use_mean_size': True,
                 'mean_size': [
-                    [3.9, 1.6, 1.56],
+                    [4.88, 1.9, 1.18],
                     [0.8, 0.6, 1.73],
                     [1.76, 0.6, 1.73]
                 ]
@@ -140,7 +140,7 @@ MODEL:
 
 OPTIMIZATION:
     BATCH_SIZE_PER_GPU: 2
-    NUM_EPOCHS: 20
+    NUM_EPOCHS: 300
 
     OPTIMIZER: adam_onecycle
     LR: 0.01

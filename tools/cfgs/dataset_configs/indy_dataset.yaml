@@ -1,17 +1,17 @@
 DATASET: 'IndyDataset'
 DATA_PATH: '../data/indy'
 
-POINT_CLOUD_RANGE: [-100, -100, -0.5, 100, 100, 9.5]
+POINT_CLOUD_RANGE: [0, -20, -0.5, 40, 100, 9.5]
 
 
 DATA_SPLIT: {
     'train': train,
-    'test': test
+    'test': val
 }
 
 INFO_PATH: {
     'train': [kitti_infos_train.pkl],
-    'test': [kitti_infos_test.pkl],
+    'test': [kitti_infos_val.pkl],
 }
 
 GET_ITEM_LIST: ["points"]
