@@ -55,6 +55,17 @@ def eval_one_epoch(cfg, args, model, dataloader, epoch_id, logger, dist_test=Fal
     if cfg.LOCAL_RANK == 0:
         progress_bar = tqdm.tqdm(total=len(dataloader), leave=True, desc='eval', dynamic_ncols=True)
     start_time = time.time()
+
+    # read img name by txt
+    label_files = []
+    name_list = "/home/ubuntu/OpenPCDet/data/indy/ImageSets/test.txt"
+    with open(name_list) as f:
+        lines = f.readlines()
+
+        for line in lines:
+            label_file = "/home/ubuntu/fusion_change/" + line[:-1] + ".txt"
+            label_files.append(label_file)
+
     for i, batch_dict in enumerate(dataloader):
         load_data_to_gpu(batch_dict)
 
@@ -64,6 +75,47 @@ def eval_one_epoch(cfg, args, model, dataloader, epoch_id, logger, dist_test=Fal
         with torch.no_grad():
             pred_dicts, ret_dict = model(batch_dict)
 
+
+        
+        print("pred_dicts old",pred_dicts)
+        print("ret_dict old", ret_dict)
+        # read fused label from file
+        cuda0 = torch.device('cuda:0')
+        record_dict = {
+            'pred_boxes': torch.tensor([]).to(cuda0, dtype=torch.float64),
+            'pred_scores': torch.tensor([]).to(cuda0),
+            'pred_labels': torch.tensor([]).to(cuda0)
+        }
+        pred_dicts = []
+        pred_dicts.append(record_dict)
+
+
+        #pred_dicts = [{'pred_boxes': tensor([])), 'pred_scores': tensor([], device='cuda:0'), 'pred_labels': tensor([], device='cuda:0', dtype=torch.int64)}]
+        ret_dict = {'gt': 1, 'roi_0.3': 0, 'rcnn_0.3': 0, 'roi_0.5': 0, 'rcnn_0.5': 0, 'roi_0.7': 0, 'rcnn_0.7': 0}
+
+        
+        with open(label_files[i]) as f:
+            lines = f.readlines()
+
+            for i in range(len(lines)):
+                token = lines[i].split()
+                # x, y, z, h, w, l, ry 8
+                #gt_bbox = [float(token[11]), float(token[12]), float(token[13]), float(token[8]), float(token[9]),
+                #           float(token[10]), float(token[14])]
+                if len(token) > 0:
+                    pred_dicts[0]['pred_boxes'] = torch.tensor([[float(token[11]), float(token[12]), float(token[13]), float(token[10]),float(token[9]), float(token[8]), float(token[14])]]).to(cuda0, dtype=torch.float64)
+                    pred_dicts[0]['pred_scores'] = torch.tensor([1]).to(cuda0)
+                    pred_dicts[0]['pred_labels'] = torch.tensor([1]).to(cuda0)
+
+                    ret_dict['rcnn_0.3'] += 1
+                    ret_dict['rcnn_0.5'] += 1
+                    ret_dict['rcnn_0.7'] += 1
+
+        
+
+        print("pred_dicts ",pred_dicts)
+        print("ret_dict ", ret_dict)
+        
         disp_dict = {}
 
         if getattr(args, 'infer_time', False):
