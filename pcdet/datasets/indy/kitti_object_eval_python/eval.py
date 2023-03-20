@@ -475,13 +475,22 @@ def eval_class(gt_annos,
     rets = calculate_iou_partly(gt_annos, dt_annos, metric, num_parts)
     overlaps, parted_overlaps, total_dt_num, total_gt_num = rets
     N_SAMPLE_PTS = 41
+
+    print("min_overlaps shape: ", min_overlaps.shape)
+    print("min_overlaps: ", min_overlaps)
     num_minoverlap = len(min_overlaps)
+    print("num_minoverlap: ", num_minoverlap)
+    
     num_class = len(current_classes)
     num_difficulty = len(difficultys)
     precision = np.zeros(
         [num_class, num_difficulty, num_minoverlap, N_SAMPLE_PTS])
     recall = np.zeros(
         [num_class, num_difficulty, num_minoverlap, N_SAMPLE_PTS])
+
+    print("precision: ", precision.shape)
+    print("recall: ", recall.shape)
+
     aos = np.zeros([num_class, num_difficulty, num_minoverlap, N_SAMPLE_PTS])
     for m, current_class in enumerate(current_classes):
         for l, difficulty in enumerate(difficultys):
@@ -490,6 +499,7 @@ def eval_class(gt_annos,
              dontcares, total_dc_num, total_num_valid_gt) = rets
             for k, min_overlap in enumerate(min_overlaps[:, metric, m]):
                 thresholdss = []
+                print("min_overlap in loop: ", min_overlap)
                 for i in range(len(gt_annos)):
                     rets = compute_statistics_jit(
                         overlaps[i],
@@ -640,20 +650,11 @@ def do_coco_style_eval(gt_annos, dt_annos, current_classes, overlap_ranges,
 
 
 def get_official_eval_result(gt_annos, dt_annos, current_classes, PR_detail_dict=None):
-    overlap_0_7 = np.array([[0.7, 0.5, 0.5, 0.7,
-                             0.5, 0.7], [0.7, 0.5, 0.5, 0.7, 0.5, 0.7],
-                            [0.7, 0.5, 0.5, 0.7, 0.5, 0.7]])
-    overlap_0_5 = np.array([[0.5, 0.5, 0.5, 0.7,
-                             0.5, 0.5], [0.5, 0.25, 0.25, 0.5, 0.25, 0.5],
-                            [0.5, 0.25, 0.25, 0.5, 0.25, 0.5]])
+    overlap_0_7 = np.array([[0.7], [0.7],[0.7]])
+    overlap_0_5 = np.array([[0.7], [0.5],[0.5]])
     min_overlaps = np.stack([overlap_0_7, overlap_0_5], axis=0)  # [2, 3, 5]
     class_to_name = {
         0: 'Car',
-        1: 'Pedestrian',
-        2: 'Cyclist',
-        3: 'Van',
-        4: 'Person_sitting',
-        5: 'Truck'
     }
     name_to_class = {v: n for n, v in class_to_name.items()}
     if not isinstance(current_classes, (list, tuple)):
@@ -666,6 +667,8 @@ def get_official_eval_result(gt_annos, dt_annos, current_classes, PR_detail_dict
             current_classes_int.append(curcls)
     current_classes = current_classes_int
     min_overlaps = min_overlaps[:, :, current_classes]
+    print("min_overlaps: \n", min_overlaps)
+   
     result = ''
     # check whether alpha is valid
     compute_aos = False
@@ -683,19 +686,18 @@ def get_official_eval_result(gt_annos, dt_annos, current_classes, PR_detail_dict
         # mAP result: [num_class, num_diff, num_minoverlap]
         for i in range(min_overlaps.shape[0]):
             result += "\n"
+            '''
             result += print_str(
                 (f"{class_to_name[curcls]} "
                  f"AP_R11@{min_overlaps[i, 0, j]:.2f}: {mAP3d[j, 0, i]:.4f}"))
-            #result += print_str((f"bbox AP:{mAPbbox[j, 0, i]:.4f}, "
-            #                     f"{mAPbbox[j, 1, i]:.4f}, "
-            #                     f"{mAPbbox[j, 2, i]:.4f}"))
-            #result += print_str((f"bev  AP:{mAPbev[j, 0, i]:.4f}, "
-            #                     f"{mAPbev[j, 1, i]:.4f}, "
-            #                     f"{mAPbev[j, 2, i]:.4f}"))
-            #result += print_str((f"3d   AP:{mAP3d[j, 0, i]:.4f}, "
-            #                     f"{mAP3d[j, 1, i]:.4f}, "
-            #                     f"{mAP3d[j, 2, i]:.4f}"))
+            '''
+            result += print_str(
+                (f"{class_to_name[curcls]} "
+                 "AP@{:.2f}, {:.2f}, {:.2f}:".format(*min_overlaps[i, :, j])))
 
+            #result += print_str((f"bbox AP:{mAPbbox[j, 0, i]:.4f}"))
+            #result += print_str((f"bev  AP:{mAPbev[j, 0, i]:.4f}"))
+            result += print_str((f"3d   AP:{mAP3d[j, 0, i]:.4f}"))
             #if compute_aos:
             #    result += print_str((f"aos  AP:{mAPaos[j, 0, i]:.2f}, "
             #                         f"{mAPaos[j, 1, i]:.2f}, "
@@ -704,19 +706,18 @@ def get_official_eval_result(gt_annos, dt_annos, current_classes, PR_detail_dict
                    # ret_dict['%s_aos/easy' % class_to_name[curcls]] = mAPaos[j, 0, 0]
                    # ret_dict['%s_aos/moderate' % class_to_name[curcls]] = mAPaos[j, 1, 0]
                    # ret_dict['%s_aos/hard' % class_to_name[curcls]] = mAPaos[j, 2, 0]
+        
+            #result += print_str(
+            #    (f"{class_to_name[curcls]} "
+            #     f"AP_R40@{min_overlaps[i, 0, j]:.2f}: {mAP3d_R40[j, 0, i]:.4f}"))
 
             result += print_str(
                 (f"{class_to_name[curcls]} "
-                 f"AP_R40@{min_overlaps[i, 0, j]:.2f}: {mAP3d_R40[j, 0, i]:.4f}"))
-            #result += print_str((f"bbox AP:{mAPbbox_R40[j, 0, i]:.4f}, "
-            #                     f"{mAPbbox_R40[j, 1, i]:.4f}, "
-            #                     f"{mAPbbox_R40[j, 2, i]:.4f}"))
-            #result += print_str((f"bev  AP:{mAPbev_R40[j, 0, i]:.4f}, "
-            #                     f"{mAPbev_R40[j, 1, i]:.4f}, "
-            #                     f"{mAPbev_R40[j, 2, i]:.4f}"))
-            #result += print_str((f"3d   AP:{mAP3d_R40[j, 0, i]:.4f}, "
-            #                     f"{mAP3d_R40[j, 1, i]:.4f}, "
-            #                     f"{mAP3d_R40[j, 2, i]:.4f}"))
+                 "AP_R40@{:.2f}, {:.2f}, {:.2f}:".format(*min_overlaps[i, :, j])))
+            
+            #result += print_str((f"bbox AP:{mAPbbox_R40[j, 0, i]:.4f}"))
+            #result += print_str((f"bev  AP:{mAPbev_R40[j, 0, i]:.4f}"))
+            result += print_str((f"3d   AP:{mAP3d_R40[j, 0, i]:.4f}"))
             #if compute_aos:
             #    result += print_str((f"aos  AP:{mAPaos_R40[j, 0, i]:.2f}, "
             #                         f"{mAPaos_R40[j, 1, i]:.2f}, "
