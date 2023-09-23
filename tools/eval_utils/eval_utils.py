@@ -121,6 +121,8 @@ def eval_one_epoch(cfg, args, model, dataloader, epoch_id, logger, dist_test=Fal
 
         if getattr(args, 'infer_time', False):
             inference_time = time.time() - start_time
+            print("time.time(): ", time.time())
+            print("inference time: ", inference_time)
             infer_time_meter.update(inference_time * 1000)
             # use ms to measure inference time
             disp_dict['infer_time'] = f'{infer_time_meter.val:.2f}({infer_time_meter.avg:.2f})'
