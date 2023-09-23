@@ -56,6 +56,7 @@ def eval_one_epoch(cfg, args, model, dataloader, epoch_id, logger, dist_test=Fal
         progress_bar = tqdm.tqdm(total=len(dataloader), leave=True, desc='eval', dynamic_ncols=True)
     start_time = time.time()
 
+    '''
     # read img name by txt
     label_files = []
     name_list = "/home/ubuntu/OpenPCDet/data/indy/ImageSets/test.txt"
@@ -65,7 +66,7 @@ def eval_one_epoch(cfg, args, model, dataloader, epoch_id, logger, dist_test=Fal
         for line in lines:
             label_file = "/home/ubuntu/fusion_change/" + line[:-1] + ".txt"
             label_files.append(label_file)
-
+    '''
     for i, batch_dict in enumerate(dataloader):
         load_data_to_gpu(batch_dict)
 
@@ -76,7 +77,7 @@ def eval_one_epoch(cfg, args, model, dataloader, epoch_id, logger, dist_test=Fal
             pred_dicts, ret_dict = model(batch_dict)
 
 
-        
+        ''' 
         print("pred_dicts old",pred_dicts)
         print("ret_dict old", ret_dict)
         # read fused label from file
@@ -115,11 +116,13 @@ def eval_one_epoch(cfg, args, model, dataloader, epoch_id, logger, dist_test=Fal
 
         print("pred_dicts ",pred_dicts)
         print("ret_dict ", ret_dict)
-        
+        '''
         disp_dict = {}
 
         if getattr(args, 'infer_time', False):
             inference_time = time.time() - start_time
+            print("time.time(): ", time.time())
+            print("inference time: ", inference_time)
             infer_time_meter.update(inference_time * 1000)
             # use ms to measure inference time
             disp_dict['infer_time'] = f'{infer_time_meter.val:.2f}({infer_time_meter.avg:.2f})'
